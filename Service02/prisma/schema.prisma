@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:password@10.110.12.53:3307/provaPaulin"
+}
+
+model Paciente {
+  id             Int        @id @default(autoincrement())
+  nome           String
+  cpf            String     @unique
+  dataNascimento DateTime
+  telefone       String?
+  email          String?    @unique
+  consultas      Consulta[]
+  criadoEm       DateTime   @default(now())
+  atualizadoEm   DateTime   @updatedAt
+}
+
+model Consulta {
+  id           Int           @id @default(autoincrement())
+  dataHora     DateTime
+  motivo       String
+  pacienteId   Int
+  paciente     Paciente      @relation(fields: [pacienteId], references: [id])
+  prontuario   Prontuario?
+  faturamento  Faturamento?
+  criadoEm     DateTime      @default(now())
+  atualizadoEm DateTime      @updatedAt
+}
+
+model Prontuario {
+  id          Int        @id @default(autoincrement())
+  consultaId  Int        @unique
+  consulta    Consulta   @relation(fields: [consultaId], references: [id])
+  descricao   String
+  criadoEm    DateTime   @default(now())
+  atualizadoEm DateTime  @updatedAt
+}
+
+model Faturamento {
+  id           Int        @id @default(autoincrement())
+  consultaId   Int        @unique
+  consulta     Consulta   @relation(fields: [consultaId], references: [id])
+  valor        Float
+  status       String     // Ex: "PAGO", "PENDENTE"
+  criadoEm     DateTime   @default(now())
+  atualizadoEm DateTime   @updatedAt
+}
